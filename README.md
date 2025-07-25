@@ -136,6 +136,25 @@ Fetch final review result from DB.
 
 ---
 
+### Example cURL Commands
+
+**Analyze a PR**
+```sh
+curl -X POST http://localhost:8000/analyze-pr \
+  -H "Content-Type: application/json" \
+  -d '{"repo_url": "https://github.com/google/adk-python", "pr_number": 2167, "github_token": "ghp_your_token_here"}'
+```
+
+**Check Task Status**
+```sh
+curl http://localhost:8000/status/<task_id>
+```
+
+**Get Analysis Results**
+```sh
+curl http://localhost:8000/results/<task_id>
+```
+---
 ## 🖥️ Frontend Dashboard
 
 - Modern HTML/CSS/JS dashboard in `frontend/index.html`
