@@ -193,7 +193,3 @@ GROQ_API_KEY=your_groq_api_key
 - Update API URLs in frontend if deploying remotely
 
 ---
-
-## 🙋‍♂️ Maintainer
-
-- Yash S (replace with your name/email)
