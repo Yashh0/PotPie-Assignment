@@ -161,6 +161,8 @@ curl http://localhost:8000/results/<task_id>
 - Start new analysis, check status, view results
 - Task history and summary stats
 
+<img width="1710" height="988" alt="image" src="https://github.com/user-attachments/assets/1c1fea8c-9b63-4a62-a51e-74c672fbaedd" />
+
 ---
 
 ## 🛠️ Design Decisions
