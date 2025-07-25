@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Review Agent - Task Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+        
+        .panel h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: #fef3cd; color: #856404; }
+        .status-processing { background: #d1ecf1; color: #0c5460; }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        
+        .task-list {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+        
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .task-details {
+            flex: 1;
+        }
+        
+        .task-id {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .results-panel {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-analysis {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .issue-item {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .issue-critical {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Code Review Agent Dashboard</h1>
+        
+        <div class="dashboard-grid">
+            <div class="panel">
+                <h2>🚀 Start New Analysis</h2>
+                <form id="analyzeForm">
+                    <div class="input-group">
+                        <label for="repoUrl">Repository URL:</label>
+                        <input type="text" id="repoUrl" placeholder="https://github.com/user/repo" value="https://github.com/google/adk-python">
+                    </div>
+                    <div class="input-group">
+                        <label for="prNumber">PR Number:</label>
+                        <input type="number" id="prNumber" placeholder="123" value="2167">
+                    </div>
+                    <div class="input-group">
+                        <label for="githubToken">GitHub Token:</label>
+                        <input type="password" id="githubToken" placeholder="ghp_...">
+                    </div>
+                    <button type="submit">Analyze PR</button>
+                </form>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 Quick Status Check</h2>
+                <div class="input-group">
+                    <label for="taskId">Task ID:</label>
+                    <input type="text" id="taskId" placeholder="Enter task ID to check status">
+                </div>
+                <button onclick="checkStatus()">Check Status</button>
+                <div id="statusResult" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+        
+        <div class="task-list">
+            <h2>📋 Recent Tasks</h2>
+            <div id="taskHistory">
+                <div class="task-item">
+                    <div class="task-details">
+                        <div>google/adk-python PR #2167</div>
+                        <div class="task-id">43f665a6-841c-480e-a8cc-62ffbd819745</div>
+                    </div>
+                    <span class="status-indicator status-success">Completed</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-panel">
+            <h2>🔍 Analysis Results</h2>
+            <div id="analysisResults">
+                <div class="file-analysis">
+                    <h3>📄 src/google/adk/tools/bigquery/config.py</h3>
+                    <p style="color: #28a745; font-weight: 600;">✅ No issues found - Clean code!</p>
+                </div>
+                <div class="file-analysis">
+                    <h3>📄 src/google/adk/tools/bigquery/query_tool.py</h3>
+                    <p style="color: #28a745; font-weight: 600;">✅ No issues found - Clean code!</p>
+                </div>
+                <div class="file-analysis">
+                    <h3>📄 tests/unittests/tools/bigquery/test_bigquery_query_tool.py</h3>
+                    <p style="color: #28a745; font-weight: 600;">✅ No issues found - Clean code!</p>
+                </div>
+                <div class="file-analysis">
+                    <h3>📄 tests/unittests/tools/bigquery/test_bigquery_tool_config.py</h3>
+                    <p style="color: #28a745; font-weight: 600;">✅ No issues found - Clean code!</p>
+                </div>
+                
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <span class="stat-number">4</span>
+                        <span>Files Analyzed</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">0</span>
+                        <span>Issues Found</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">0</span>
+                        <span>Critical Issues</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        
+        document.getElementById('analyzeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const repoUrl = document.getElementById('repoUrl').value;
+            const prNumber = document.getElementById('prNumber').value;
+            const githubToken = document.getElementById('githubToken').value;
+            
+            const payload = {
+                repo_url: repoUrl,
+                pr_number: parseInt(prNumber)
+            };
+            
+            if (githubToken) {
+                payload.github_token = githubToken;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8000/analyze-pr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                // Add to task history
+                tasks.unshift({
+                    taskId: result.task_id,
+                    repo: repoUrl,
+                    pr: prNumber,
+                    status: result.status,
+                    timestamp: new Date()
+                });
+                
+                updateTaskHistory();
+                document.getElementById('taskId').value = result.task_id;
+                
+                // Auto-check status
+                setTimeout(() => checkStatus(), 2000);
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+        
+        async function checkStatus() {
+            const taskId = document.getElementById('taskId').value;
+            if (!taskId) return;
+            
+            const statusDiv = document.getElementById('statusResult');
+            statusDiv.innerHTML = '<div class="loading"></div> Checking status...';
+            
+            try {
+                const response = await fetch(`http://localhost:8000/status/${taskId}`);
+                const result = await response.json();
+                
+                let statusClass = 'status-pending';
+                if (result.status === 'SUCCESS') statusClass = 'status-success';
+                else if (result.status === 'FAILURE') statusClass = 'status-failed';
+                else if (result.status === 'PROGRESS') statusClass = 'status-processing';
+                
+                statusDiv.innerHTML = `
+                    <div style="margin-top: 10px;">
+                        <span class="status-indicator ${statusClass}">${result.status}</span>
+                        ${result.status === 'SUCCESS' ? '<br><br><button onclick="loadResults()">View Results</button>' : ''}
+                    </div>
+                `;
+                
+                if (result.status === 'SUCCESS') {
+                    setTimeout(loadResults, 1000);
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadResults() {
+            const taskId = document.getElementById('taskId').value;
+            if (!taskId) return;
+            
+            try {
+                const response = await fetch(`http://localhost:8000/results/${taskId}`);
+                const result = await response.json();
+                
+                displayResults(result.results);
+                
+            } catch (error) {
+                alert('Error loading results: ' + error.message);
+            }
+        }
+        
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            let html = '';
+            
+            results.files.forEach(file => {
+                html += `<div class="file-analysis">`;
+                html += `<h3>📄 ${file.name}</h3>`;
+                
+                if (file.issues.length === 0) {
+                    html += `<p style="color: #28a745; font-weight: 600;">✅ No issues found - Clean code!</p>`;
+                } else {
+                    file.issues.forEach(issue => {
+                        const issueClass = issue.type === 'critical' ? 'issue-critical' : 'issue-item';
+                        html += `
+                            <div class="${issueClass}">
+                                <strong>Line ${issue.line}:</strong> ${issue.description}<br>
+                                <em>Suggestion: ${issue.suggestion}</em>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `</div>`;
+            });
+            
+            html += `
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <span class="stat-number">${results.summary.total_files}</span>
+                        <span>Files Analyzed</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${results.summary.total_issues}</span>
+                        <span>Issues Found</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">${results.summary.critical_issues}</span>
+                        <span>Critical Issues</span>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function updateTaskHistory() {
+            const historyDiv = document.getElementById('taskHistory');
+            
+            let html = '';
+            tasks.forEach(task => {
+                let statusClass = 'status-pending';
+                if (task.status === 'SUCCESS' || task.status === 'completed') statusClass = 'status-success';
+                else if (task.status === 'FAILURE') statusClass = 'status-failed';
+                
+                html += `
+                    <div class="task-item">
+                        <div class="task-details">
+                            <div>${task.repo.split('/').slice(-2).join('/')} PR #${task.pr}</div>
+                            <div class="task-id">${task.taskId}</div>
+                        </div>
+                        <span class="status-indicator ${statusClass}">${task.status}</span>
+                    </div>
+                `;
+            });
+            
+            historyDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
