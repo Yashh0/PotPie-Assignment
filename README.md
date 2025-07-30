@@ -1,6 +1,6 @@
-# 🧠 PotPie AI – Autonomous Code Review Agent
+# 🧠 CodeSage AI – Autonomous Code Review Agent
 
-PotPie is an async, autonomous code review backend that fetches GitHub pull request diffs, analyzes them using an LLM-powered agent (Groq API), and returns structured feedback via a FastAPI REST API. Results are processed asynchronously with Celery and stored in PostgreSQL. The system is fully dockerized and includes a modern frontend dashboard.
+CodeSage is an async, autonomous code review backend that fetches GitHub pull request diffs, analyzes them using an LLM-powered agent (Groq API), and returns structured feedback via a FastAPI REST API. Results are processed asynchronously with Celery and stored in PostgreSQL. The system is fully dockerized and includes a modern frontend dashboard.
 
 ---
 
@@ -37,7 +37,7 @@ PotPie is an async, autonomous code review backend that fetches GitHub pull requ
 
 ```sh
 git clone <your-repo-url>
-cd PotPie
+cd CodeSage  
 cp .env.example .env  # Fill in your GitHub token, Groq API key, etc.
 ```
 
@@ -202,7 +202,7 @@ Create `.env.example`:
 ```
 GITHUB_TOKEN=ghp_...
 REDIS_URL=redis://redis:6379/0
-POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/potpie
+POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/CodeSage  
 GROQ_API_KEY=your_groq_api_key
 ```
 
